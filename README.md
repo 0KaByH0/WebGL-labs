@@ -1,5 +1,8 @@
-# WebGL
+# WebGL LABS
 
-Project that accompanies VGGI credit module.
+VARIANT 28 Shevchuk Dmytro TR-22mp
 
-Visit vggi-kpi.blogspot.com for more information
+PA 1
+
+![image](/pa1/1.png)
+![image](/pa1/2.png)
