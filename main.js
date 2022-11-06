@@ -24,16 +24,21 @@ function Model(name) {
     this.count = vertices.length / 3;
   };
 
-    this.Draw = function() {
+  this.Draw = function () {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBuffer);
+    gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(shProgram.iAttribVertex);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.iVertexBuffer);
-        gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(shProgram.iAttribVertex);
-   
-        gl.drawArrays(gl.LINE_STRIP, 0, this.count);
+    if (surfaceType.checked) {
+      gl.drawArrays(gl.TRIANGLES_FAN, 0, this.count);
+    } else {
+      const stepLength = this.count / pointsLength;
+      for (let step = 0; step < this.count; step += stepLength) {
+        gl.drawArrays(gl.LINE_STRIP, step, stepLength);
+      }
     }
+  };
 }
-
 
 // Constructor
 function ShaderProgram(name, program) {
