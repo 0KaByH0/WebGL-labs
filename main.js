@@ -4,10 +4,8 @@ let gl; // The webgl context.
 let surface; // A surface model
 let shProgram; // A shader program
 let spaceball; // A SimpleRotator object that lets the user rotate the view by mouse.
-let gl;                         // The webgl context.
-let surface;                    // A surface model
-let shProgram;                  // A shader program
-let spaceball;                  // A SimpleRotator object that lets the user rotate the view by mouse.
+let surfaceType;
+let pointsLength = 0;
 
 function deg2rad(angle) {
   return (angle * Math.PI) / 180;
@@ -90,16 +88,32 @@ function reDraw() {
   draw();
 }
 
-function CreateSurfaceData()
-{
-    let vertexList = [];
+function CreateSurfaceData() {
+  let vertexList = [];
 
-    for (let i=0; i<360; i+=5) {
-        vertexList.push( Math.sin(deg2rad(i)), 1, Math.cos(deg2rad(i)) );
-        vertexList.push( Math.sin(deg2rad(i)), 0, Math.cos(deg2rad(i)) );
+  const U_END = 360;
+  const V_END = 50;
+  const a = 1;
+  const b = 1;
+  const n = 1;
+
+  const step = surfaceType.checked ? 0.2 : 1;
+
+  for (let u = 0; u < U_END; u += step) {
+    for (let v = -1; v < V_END; v += step) {
+      const vRad = deg2rad(v);
+      const uRad = deg2rad(u);
+
+      let x = (a + b * Math.sin(n * uRad)) * Math.cos(uRad) - vRad * Math.sin(uRad);
+      let y = (a + b * Math.sin(n * uRad)) * Math.sin(uRad) + vRad * Math.cos(uRad);
+      let z = b * Math.cos(n * uRad);
+      vertexList.push(x, y, z);
     }
+  }
 
-    return vertexList;
+  pointsLength = U_END;
+
+  return vertexList;
 }
 
 /* Initialize the WebGL context. Called from init() */
@@ -154,8 +168,8 @@ function createProgram(gl, vShader, fShader) {
  * initialization function that will be called when the page has loaded
  */
 function init() {
-    let canvas;
-    try {
+  surfaceType = document.getElementById('SurfaceType');
+
   let canvas;
   try {
     canvas = document.getElementById('webglcanvas');
