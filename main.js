@@ -5,6 +5,7 @@ let surface; // A surface model
 let shProgram; // A shader program
 let spaceball; // A SimpleRotator object that lets the user rotate the view by mouse.
 let surfaceType;
+let lPosElements;
 let pointsLength = 0;
 
 function deg2rad(angle) {
@@ -29,6 +30,9 @@ function Model(name) {
     gl.vertexAttribPointer(shProgram.iAttribVertex, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(shProgram.iAttribVertex);
 
+    gl.vertexAttribPointer(shProgram.iNormal, 3, gl.FLOAT, true, 0, 0);
+    gl.enableVertexAttribArray(shProgram.iNormal);
+
     if (surfaceType.checked) {
       gl.drawArrays(gl.TRIANGLES_FAN, 0, this.count);
     } else {
@@ -45,12 +49,26 @@ function ShaderProgram(name, program) {
   this.name = name;
   this.prog = program;
 
-  // Location of the attribute variable in the shader program.
   this.iAttribVertex = -1;
-  // Location of the uniform specifying a color for the primitive.
   this.iColor = -1;
-  // Location of the uniform matrix representing the combined transformation.
+
   this.iModelViewProjectionMatrix = -1;
+
+  // normals
+  this.iNormal = 0;
+  this.iNormalMatrix = 0;
+
+  // colors
+  this.iAmbientColor = 0;
+  this.iDiffuseColor = 0;
+  this.iSpecularColor = 0;
+
+  // shines
+  this.iShininess = 0;
+
+  // light pos
+  this.iLightPos = 0;
+  this.iLightVec = 0;
 
   this.Use = function () {
     gl.useProgram(this.prog);
@@ -65,8 +83,10 @@ function draw() {
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  const lPos = Array.from(lPosElements.getElementsByTagName('input')).map((el) => +el.value);
+
   /* Set the values of the projection transformation */
-  const projection = m4.perspective(Math.PI / 8, 1, 8, 12);
+  const projection = m4.orthographic(-20, 20, -20, 20, -20, 20);
 
   /* Get the view matrix from the SimpleRotator object.*/
   const modelView = spaceball.getViewMatrix();
@@ -77,24 +97,35 @@ function draw() {
   const matAccum0 = m4.multiply(rotateToPointZero, modelView);
   const matAccum1 = m4.multiply(translateToPointZero, matAccum0);
 
-  /* Multiply the projection matrix times the modelview matrix to give the
-       combined transformation matrix, and send that to the shader program. */
   const modelViewProjection = m4.multiply(projection, matAccum1);
-  gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
 
-  /* Draw the six faces of a cube, with different colors. */
+  const modelviewInv = m4.inverse(matAccum1, new Float32Array(16));
+  const normalMatrix = m4.transpose(modelviewInv, new Float32Array(16));
+
+  gl.uniformMatrix4fv(shProgram.iModelViewProjectionMatrix, false, modelViewProjection);
+  gl.uniformMatrix4fv(shProgram.iNormalMatrix, false, normalMatrix);
+
+  gl.uniform1f(shProgram.iShininess, 10.0);
+  gl.uniform3fv(shProgram.iLightPos, lPos);
+  gl.uniform3fv(shProgram.iLightVec, new Float32Array(3));
+  gl.uniform3fv(shProgram.iAmbientColor, [0.2, 0.1, 0.0]);
+  gl.uniform3fv(shProgram.iDiffuseColor, [1.0, 1.0, 0.0]);
+  gl.uniform3fv(shProgram.iSpecularColor, [1.0, 1.0, 1.0]);
+
   gl.uniform4fv(shProgram.iColor, [1, 1, 0, 1]);
 
   surface.Draw();
 }
 
-function reDraw() {
+function rerender() {
   surface.BufferData(CreateSurfaceData());
   draw();
 }
 
 function CreateSurfaceData() {
   let vertexList = [];
+
+  const scale = 3.5;
 
   const U_END = 360;
   const V_END = 50;
@@ -112,7 +143,8 @@ function CreateSurfaceData() {
       let x = (a + b * Math.sin(n * uRad)) * Math.cos(uRad) - vRad * Math.sin(uRad);
       let y = (a + b * Math.sin(n * uRad)) * Math.sin(uRad) + vRad * Math.cos(uRad);
       let z = b * Math.cos(n * uRad);
-      vertexList.push(x, y, z);
+
+      vertexList.push(x * scale, y * scale, z * scale);
     }
   }
 
@@ -131,6 +163,18 @@ function initGL() {
   shProgram.iAttribVertex = gl.getAttribLocation(prog, 'vertex');
   shProgram.iModelViewProjectionMatrix = gl.getUniformLocation(prog, 'ModelViewProjectionMatrix');
   shProgram.iColor = gl.getUniformLocation(prog, 'color');
+
+  shProgram.iNormal = gl.getAttribLocation(prog, 'normal');
+  shProgram.iNormalMatrix = gl.getUniformLocation(prog, 'normalMatrix');
+
+  shProgram.iAmbientColor = gl.getUniformLocation(prog, 'ambientColor');
+  shProgram.iDiffuseColor = gl.getUniformLocation(prog, 'diffuseColor');
+  shProgram.iSpecularColor = gl.getUniformLocation(prog, 'specularColor');
+
+  shProgram.iShininess = gl.getUniformLocation(prog, 'shininessVal');
+
+  shProgram.iLightPos = gl.getUniformLocation(prog, 'lightPos');
+  shProgram.iLightVec = gl.getUniformLocation(prog, 'lightVec');
 
   surface = new Model('Surface');
   surface.BufferData(CreateSurfaceData());
@@ -174,6 +218,7 @@ function createProgram(gl, vShader, fShader) {
  */
 function init() {
   surfaceType = document.getElementById('SurfaceType');
+  lPosElements = document.getElementById('lPos');
 
   let canvas;
   try {
