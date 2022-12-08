@@ -21,13 +21,33 @@
 
 <body onload="init()">
 
-    <h2>PA 1 Variant 28 Shevchuk Dmytro TR-22mp</h2>
+    <h2>PA 2 Variant 28 Shevchuk Dmytro TR-22mp</h2>
     <h3>Ruled rotor cylindroid</h3>
 
     <div>
         <label for="surtype">Filled / WireFrame mode</label>
-        <input name="surtype" type="checkbox" id="SurfaceType" checked onchange="reDraw()">
+        <input name="surtype" type="checkbox" id="SurfaceType" checked onchange="rerender()">
     </div>
+    <hr />
+    <p>
+        <b>| Light Local |</b>
+        <b>Shading Phong |</b>
+        <b>Projection Ortho |</b>
+        <b>Normal Analytic |</b>
+        <b>Light path lineSeg |</b>
+    </p>
+    <hr />
+    <div id="lPos">
+        <p>Move light from -25 to 25</p>
+        <label for="lPosX">X:</label>
+        <input id="lPosX" type="range" min="-25" max="25" step="1" onchange="rerender()" />
+        <label for="lPosY">Y:</label>
+        <input id="lPosY" type="range" min="-25" max="25" step="1" onchange="rerender()" />
+        <label for="lPosZ">Z:</label>
+        <input id="lPosZ" type="range" min="-25" max="25" step="1" onchange="rerender()" />
+    </div>
+    <br />
+
     <div id="canvas-holder">
         <canvas width="600" height="600" id="webglcanvas" style="background-color:red"></canvas>
     </div>
