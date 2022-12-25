@@ -46,6 +46,11 @@
         <label for="lPosZ">Z:</label>
         <input id="lPosZ" type="range" min="-25" max="25" step="1" onchange="rerender()" />
     </div>
+    <div id="textureControls">
+        <label for="rotationAngle">RotationAngle:</label>
+        <input id="rotationAngle" type="range" min="-180" max="180" step="1" onchange="rerender()" />
+        <p id="userCoords"></p>
+    </div>
     <br />
 
     <div id="canvas-holder">
