@@ -28,8 +28,8 @@ mat4 getRotate(float angleRad) {
 
 mat4 getTranslate(vec2 t) {
   return mat4(
-    1.0, 0.0, 0.0, 0.0,
-    t.x, t.y, 0.0, 0.0,
+    1.0, 0.0, 0.0, t.x,
+    0.0, 1.0, 0.0, t.y,
     0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 0.0, 1.0
   );
@@ -44,7 +44,7 @@ void main(){
   mat4 translate = getTranslate(-fUserPoint);
   mat4 translateBack = getTranslate(fUserPoint);
 
-  vec4 textCoordTr = vec4(textCoords, 0, 0) * translate;
+  vec4 textCoordTr = translate * vec4(textCoords, 0, 0);
   vec4 textCoordRotate = textCoordTr * rotateMat;
   vec4 textCoordTrBack = textCoordRotate * translateBack;
 
