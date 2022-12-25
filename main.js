@@ -156,7 +156,7 @@ function CreateSurfaceData() {
 
   const step = 1;
 
-  const calculateUv = (u, v) => [u / U_END, (v + V_END) / (2 * V_END)];
+  const calculateUv = (u, v) => [u / U_END, (v + 1) / V_END + 1];
 
   for (let u = 0; u < U_END; u += step) {
     for (let v = -1; v < V_END; v += step) {
@@ -168,7 +168,7 @@ function CreateSurfaceData() {
       const z = b * Math.cos(n * uRad);
 
       vertexList.push(x * scale, y * scale, z * scale);
-      textCoords.push(...calculateUv(uRad, vRad));
+      textCoords.push(...calculateUv(u, v));
 
       const vRadNext = deg2rad(v + step);
       const uRadNext = deg2rad(u + step);
@@ -180,7 +180,7 @@ function CreateSurfaceData() {
       const z1 = b * Math.cos(n * uRadNext);
 
       vertexList.push(x1 * scale, y1 * scale, z1 * scale);
-      textCoords.push(...calculateUv(uRadNext, vRadNext));
+      textCoords.push(...calculateUv(u, v));
     }
   }
 
@@ -303,6 +303,8 @@ function loadTexture() {
   image.onload = () => {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+    draw();
   };
 }
 
